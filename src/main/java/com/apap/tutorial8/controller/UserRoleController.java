@@ -1,5 +1,7 @@
 package com.apap.tutorial8.controller;
 
+import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -7,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
 import com.apap.tutorial8.model.PasswordModel;
 import com.apap.tutorial8.model.UserRoleModel;
 import com.apap.tutorial8.service.UserRoleService;
@@ -18,7 +21,15 @@ public class UserRoleController {
 	private UserRoleService userService;
 
 	@RequestMapping( value = "/addUser", method = RequestMethod.POST)
-	private String addUserSubmit(@ModelAttribute UserRoleModel user) {
+	private String addUserSubmit(@ModelAttribute UserRoleModel user, Model model) {
+		Boolean passValidation= syaratPassword(user.getPassword());
+		if(passValidation==true) {
+			userService.addUser(user);
+		}
+		else {
+			model.addAttribute("message", "Password teralu lemah");
+		}		
+		
 		userService.addUser(user);
 		return "home";
 	}
@@ -34,9 +45,11 @@ public class UserRoleController {
 		if (password.getConPassword().equals(password.getNewPassword())) {
 			System.out.println(authentication.getName());
 			if (userService.validatePassword(currUser.getPassword(), password.getOldPassword())) {
+				if (syaratPassword(password.getNewPassword())) {
+					userService.changePassword(currUser, password.getNewPassword());
+					model.addAttribute("message", "password telah diubah");
+				}
 				
-				userService.changePassword(currUser, password.getNewPassword());
-				model.addAttribute("message", "password telah diubah");
 			}
 			else {
 				model.addAttribute("message", "password lama anda salah");
@@ -52,5 +65,13 @@ public class UserRoleController {
 		return "update-password";
 	}
 	
-
+	public boolean syaratPassword(String password) {
+		if (password.length()>=8 && Pattern.compile("[0-9]").matcher(password).find() &&  Pattern.compile("[a-zA-Z]").matcher(password).find())  {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 }
