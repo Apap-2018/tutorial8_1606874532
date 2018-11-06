@@ -35,8 +35,8 @@ public class UserRoleServiceImpl implements UserRoleService{
 
 	@Override
 	public boolean validatePassword(String oldPassword, String inputOldPassword) {
-		String cekPassword = encrypt(inputOldPassword);
-		if (passwordEncoder.matches(oldPassword, cekPassword)) {
+		/*String cekPassword = encrypt(inputOldPassword);*/
+		if (passwordEncoder.matches(inputOldPassword, oldPassword)) {
 			return true;
 		}else {
 			return false;
